@@ -21,6 +21,27 @@ class MainVC: UIViewController {
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
+        
+        // TODO: Get location when user tapped 3 seconds on map.
+        let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(getTappedLocation(gestureRecognizer:)))
+        gestureRecognizer.minimumPressDuration = 2
+        mapView.addGestureRecognizer(gestureRecognizer)
+    }
+    
+    @objc private func getTappedLocation(gestureRecognizer: UILongPressGestureRecognizer) {
+        if gestureRecognizer.state == .began {
+            // TODO: Firstly, get point of touched. Later convert coordinate from mapView to point.
+            let touchedPoint = gestureRecognizer.location(in: mapView)
+            let touchedCoordinates = mapView.convert(touchedPoint, toCoordinateFrom: mapView)
+            
+            // TODO: Add pin on map.
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = touchedCoordinates
+            annotation.title = "TestTitle"
+            annotation.subtitle = "TestSubtitle"
+            mapView.addAnnotation(annotation)
+            
+        }
     }
 
 }
