@@ -8,11 +8,17 @@
 import UIKit
 import MapKit
 import CoreLocation
+import CoreData
 
 class MainVC: UIViewController {
 
+    @IBOutlet private weak var txtViewLocationName: UITextField!
+    @IBOutlet private weak var txtViewComment: UITextField!
     @IBOutlet private weak var mapView: MKMapView!
     private var locationManager = CLLocationManager()
+    
+    var selectedLatitude = Double()
+    var selectedLongitude = Double()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,16 +40,38 @@ class MainVC: UIViewController {
             let touchedPoint = gestureRecognizer.location(in: mapView)
             let touchedCoordinates = mapView.convert(touchedPoint, toCoordinateFrom: mapView)
             
+            selectedLatitude = touchedCoordinates.latitude
+            selectedLongitude = touchedCoordinates.longitude
+            
             // TODO: Add pin on map.
             let annotation = MKPointAnnotation()
             annotation.coordinate = touchedCoordinates
-            annotation.title = "TestTitle"
-            annotation.subtitle = "TestSubtitle"
+            annotation.title = txtViewLocationName.text
+            annotation.subtitle = txtViewComment.text
             mapView.addAnnotation(annotation)
             
         }
     }
-
+    
+    @IBAction func btnSaveClicked(_ sender: UIButton) {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let context = appDelegate.persistentContainer.viewContext
+        
+        let newLocation = NSEntityDescription.insertNewObject(forEntityName: "Locations", into: context)
+        newLocation.setValue(UUID(), forKey: "id")
+        newLocation.setValue(txtViewLocationName.text, forKey: "name")
+        newLocation.setValue(txtViewComment.text, forKey: "comment")
+        newLocation.setValue(selectedLatitude, forKey: "latitude")
+        newLocation.setValue(selectedLongitude, forKey: "longitude")
+        
+        do {
+            try context.save()
+            print("Saved location.")
+        } catch {
+            print(error)
+        }
+    }
+    
 }
 
 extension MainVC: MKMapViewDelegate {
